@@ -9,7 +9,7 @@ def new_message_handler(collection, msg):
         timestamp = dt.datetime.strptime(msg['time'], '%Y-%m-%dT%H:%M:%S.%fZ')
         parsed = parse_text(txt)
     except Exception as e:
-        logging.warning('Failed to parse txt' + e.msg)
+        logging.error('Failed to parse txt', e)
         timestamp = dt.datetime.now()
         parsed = {}
 
