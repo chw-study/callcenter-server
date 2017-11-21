@@ -1,0 +1,10 @@
+version: '2'
+services:
+  healthworkers:
+    image: nandanrao/healthworkers
+    env_file:
+      - ./.env
+    fip: 209.177.93.17
+    size: S2
+    ports:
+      - "80:5000"

@@ -9,6 +9,7 @@ from toolz import assoc_in, assoc, dissoc, get_in
 import os, sys, logging, json
 import datetime as dt
 from itertools import islice
+import logging
 
 from .calls import hours_ago, get_records, get_needed_calls
 from .handlers import new_message_handler

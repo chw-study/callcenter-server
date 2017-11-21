@@ -1,13 +1,15 @@
 import datetime as dt
 from nltk.tokenize import wordpunct_tokenize, word_tokenize
 import re
+import logging
 
 def new_message_handler(collection, msg):
     txt = msg['text']
     try:
         timestamp = dt.datetime.strptime(msg['time'], '%Y-%m-%dT%H:%M:%S.%fZ')
         parsed = parse_text(txt)
-    except:
+    except Exception as e:
+        logging.warning('Failed to parse txt' + e.msg)
         timestamp = dt.datetime.now()
         parsed = {}
 
