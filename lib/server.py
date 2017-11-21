@@ -19,9 +19,11 @@ logging.basicConfig(level = logging.DEBUG)
 app = Flask(__name__)
 CORS(app)
 
-# # Connect to Mongo --> TODO: close connection on shutdown hook!
+# Connect to Mongo --> TODO: close connection on shutdown hook!
 client = MongoClient(
-    host = os.environ.get('MONGO_HOST') or None
+    os.environ.get('MONGO_HOST') or None,
+    username = os.environ.get('MONGO_USER') or None,
+    password = os.environ.get('MONGO_PASS') or None
 )
 
 def dump(raw):

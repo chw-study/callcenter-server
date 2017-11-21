@@ -1,5 +1,4 @@
 import datetime as dt
-import phonenumbers as pn
 from nltk.tokenize import wordpunct_tokenize, word_tokenize
 import re
 
