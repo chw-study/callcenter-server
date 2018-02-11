@@ -31,7 +31,7 @@ def parse_text(text):
     text = [word for word in words if not re.search('\d+', word)]
     nums = [word for word in words if re.search('\d+', word)]
     nums = p.findall(''.join(nums))
-    phone = int(''.join(nums))
+    phone = ''.join(nums)
 
     p = re.compile("[.,\/#!$%\^&\*;:{}=\-_`~()]")
     name = ' '.join([s for s in [p.sub('', t) for t in text] if s])

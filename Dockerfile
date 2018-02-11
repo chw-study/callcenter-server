@@ -9,4 +9,6 @@ RUN python -m nltk.downloader punkt
 
 COPY . /usr/src/app
 
+EXPOSE 8080 5000
+
 CMD [ "python", "__main__.py" ]

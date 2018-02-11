@@ -73,5 +73,6 @@ def get_articles():
     hours = int(request.args.get('hours', 1))
     percent = float(request.args.get('percent', 0.75))
     start = int(request.args.get('start', 0))
+    num = int(request.args.get('num', 1))
     cursor = get_records(coll, get_needed_calls(coll, percent), hours)
-    return dump(islice(cursor, start+20))
+    return dump(islice(cursor, start+num))

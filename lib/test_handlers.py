@@ -43,6 +43,10 @@ def test_new_message_handler_works_with_default_date(collection):
 
 def test_parse_text():
     parsed = parse_text('+234-5098 034 nand,an .rao f/oo')
-    assert(parsed == {'phone': 2345098034, 'name': 'nand an rao foo'})
+    assert(parsed == {'phone': '2345098034', 'name': 'nand an rao foo'})
     parsed = parse_text('nand f^doo. +54 (542).545')
-    assert(parsed == {'phone': 54542545, 'name': 'nand fdoo'})
+    assert(parsed == {'phone': '54542545', 'name': 'nand fdoo'})
+
+def test_parse_text_handles_leading_zeros():
+    parsed = parse_text('+0238909 foo')
+    assert(parsed == {'phone': '2398909', 'name': 'foo'}
