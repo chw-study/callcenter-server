@@ -1,0 +1,31 @@
+version: '3'
+services:
+  hw_server:
+    build:
+      context: .
+    entrypoint:
+      - flask
+      - run
+      - --host=0.0.0.0
+    environment:
+      MONGO_HOST: mongodb://mongo:27017
+      FLASK_DEBUG: 1
+      FLASK_APP: lib/server.py
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "5000:5000"
+  retriever:
+    image: nandanrao/retriever
+    env_file:
+      ../retriever/.env
+    environment:
+      - ORANGE_RSA=${ORANGE_RSA}
+  mongo:
+    image: mongo:latest
+    volumes:
+      - healthworkers:/data/db
+    ports:
+      - "27017:27017"
+volumes:
+  healthworkers:

@@ -16,7 +16,9 @@ from .handlers import new_message_handler
 
 log_level = getattr(logging, os.environ.get('LOG_LEVEL', 'INFO').upper())
 logging.basicConfig(level = logging.DEBUG)
+
 # Make app
+print('Making app: ' + __name__)
 app = Flask(__name__)
 CORS(app)
 
@@ -39,6 +41,7 @@ def dump(raw):
         return dumps(raw)
 
 
+# maybe this should just go to a new collection of attempts
 @app.route('/messages/<msg_id>/attempt', methods=['POST'])
 def handle_attempt(msg_id):
     collection = client['healthworkers'].messages
@@ -60,12 +63,15 @@ def update_message(msg_id):
         return_document=ReturnDocument.AFTER)
     return dump(update)
 
+# TODO: remove this and all associated handlers + NLTK?
 @app.route('/messages', methods=['POST'])
 def new_message():
     collection = client['healthworkers'].messages
     msg = {k:request.form[k] for k in ['text', 'phone', 'time', 'run']}
     new_message_handler(collection, msg)
     return 'Success'
+
+from time import sleep
 
 @app.route('/messages', methods=['GET'])
 def get_articles():
