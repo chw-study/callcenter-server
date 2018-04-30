@@ -29,7 +29,7 @@ client = MongoClient(
     password = os.environ.get('MONGO_PASS') or None
 )
 
-COLLECTION = os.environ.get('MONGO_COLLECTION') or 'healthworkers-dev'
+COLLECTION = os.environ.get('MONGO_COLLECTION') or 'healthworkers'
 
 def dump(raw):
     id_fixer = lambda r: assoc(r, '_id', str(r['_id']))
