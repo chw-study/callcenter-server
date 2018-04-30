@@ -10,8 +10,7 @@ import os, sys, logging, json
 import datetime as dt
 from itertools import islice
 import logging
-
-from .calls import hours_ago, get_records, get_needed_calls
+from .calls import hours_ago, get_records, get_needed_calls, get_worker_lookup
 from .handlers import new_message_handler
 
 log_level = getattr(logging, os.environ.get('LOG_LEVEL', 'INFO').upper())
@@ -29,7 +28,7 @@ client = MongoClient(
     password = os.environ.get('MONGO_PASS') or None
 )
 
-COLLECTION = os.environ.get('MONGO_COLLECTION') or 'healthworkers'
+DB = 'healthworkers'
 
 def dump(raw):
     id_fixer = lambda r: assoc(r, '_id', str(r['_id']))
@@ -46,7 +45,7 @@ def dump(raw):
 # maybe this should just go to a new collection of attempts
 @app.route('/messages/<msg_id>/attempt', methods=['POST'])
 def handle_attempt(msg_id):
-    collection = client[COLLECTION].messages
+    collection = client[DB].messages
     time = dt.datetime.now()
     update = collection.find_one_and_update(
         { '_id': ObjectId(msg_id)},
@@ -58,7 +57,7 @@ def handle_attempt(msg_id):
 def update_message(msg_id):
     data = request.json
     print(data)
-    collection = client[COLLECTION].messages
+    collection = client[DB].messages
     update = collection.find_one_and_update(
         { '_id': ObjectId(msg_id)},
         {'$set': data},
@@ -68,7 +67,7 @@ def update_message(msg_id):
 # TODO: remove this and all associated handlers + NLTK?
 @app.route('/messages', methods=['POST'])
 def new_message():
-    collection = client[COLLECTION].messages
+    collection = client[DB].messages
     msg = {k:request.form[k] for k in ['text', 'phone', 'time', 'run']}
     new_message_handler(collection, msg)
     return 'Success'
@@ -77,10 +76,18 @@ from time import sleep
 
 @app.route('/messages', methods=['GET'])
 def get_articles():
-    coll = client[COLLECTION].messages
+    coll = client[DB].messages
     hours = int(request.args.get('hours', 1))
     percent = float(request.args.get('percent', 0.75))
     start = int(request.args.get('start', 0))
     num = int(request.args.get('num', 1))
-    cursor = get_records(coll, get_needed_calls(coll, percent), hours)
-    return dump(islice(cursor, start+num))
+
+    # Get (memoized) district phone-numbers/names from DB
+    district = request.args.get('district')
+    district_lookup = get_worker_lookup(client[DB].workers, district)
+
+    # get records and return
+    needed = get_needed_calls(coll, percent, district_lookup)
+    cursor = get_records(coll, needed, hours, district_lookup)
+    result = dump(islice(cursor, start+num))
+    return result

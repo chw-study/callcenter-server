@@ -49,4 +49,4 @@ def test_parse_text():
 
 def test_parse_text_handles_leading_zeros():
     parsed = parse_text('+0238909 foo')
-    assert(parsed == {'phone': '2398909', 'name': 'foo'}
+    assert(parsed == {'phone': '0238909', 'name': 'foo'})

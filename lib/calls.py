@@ -3,6 +3,9 @@ import datetime as dt
 from itertools import groupby
 from collections import OrderedDict
 import logging
+from toolz import assoc
+from cacheout import Cache
+cache = Cache(maxsize=1024, ttl=300)
 
 def hours_ago(hours):
     return dt.datetime.utcnow() - dt.timedelta(hours = hours)
@@ -27,10 +30,12 @@ def group_call_counts(calls):
     return (format_group(k,g) for k,g in
             groupby(calls, key = lambda c: c['_id']['workerPhone']))
 
-def get_call_counts(collection):
+def get_call_counts(collection, district_lookup):
     # TODO: Add "refused to give consent" fileter!!
     # TODO: Add filter for STALE records!!
+    district_nums = list(district_lookup.keys())
     cursor = collection.aggregate([
+        { '$match': {'workerPhone': { '$in': district_nums}}},
         { '$group': { '_id': {'workerPhone': '$workerPhone', 'called': '$called'}, 'count': { '$sum': 1 }}},
         { '$sort': OrderedDict([ ('_id.workerPhone', 1), ('_id.called', 1)])}
     ])
@@ -38,11 +43,23 @@ def get_call_counts(collection):
     return (c for c in cursor if (c['_id'].get('workerPhone')))
 
 
-def get_needed_calls(coll, percent):
+def get_needed_calls(coll, percent, district_lookup):
     return ({'workerPhone': c['workerPhone'], 'needed': needed_calls(c, percent)}
-            for c in group_call_counts(get_call_counts(coll)))
+            for c in group_call_counts(get_call_counts(coll, district_lookup)))
 
-def get_records(coll, needed, hours):
+def get_worker_lookup(coll, district):
+    cached = cache.get(district)
+    if cached:
+        return cached
+    res = coll.find({'chw_district': district})
+    lookup = {r.get('reporting_number'): r.get('name') for r in res}
+    cache.set(district, lookup)
+    return lookup
+
+def add_name(lookup, r):
+    return assoc(r, 'workerName', lookup[r['workerPhone']])
+
+def get_records(coll, needed, hours, lookup):
     # TODO: Add filter for STALE records!!
     cursors = ((coll
                 .find({ 'workerPhone': n['workerPhone'],
@@ -51,4 +68,4 @@ def get_records(coll, needed, hours):
                         'attempts': {'$not': { '$gte': hours_ago(hours) }}})
                 .limit(n['needed']))
                for n in needed if n['needed'] > 0)
-    return (c for i in cursors for c in i)
+    return (add_name(lookup, c) for i in cursors for c in i)

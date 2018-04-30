@@ -1,5 +1,6 @@
 apipkg==1.4
 beautifulsoup4==4.6.0
+cacheout==0.10.0
 click==6.7
 dnspython==1.15.0
 execnet==1.5.0
