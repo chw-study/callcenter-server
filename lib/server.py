@@ -29,6 +29,8 @@ client = MongoClient(
     password = os.environ.get('MONGO_PASS') or None
 )
 
+COLLECTION = os.environ.get('MONGO_COLLECTION') or 'healthworkers-dev'
+
 def dump(raw):
     id_fixer = lambda r: assoc(r, '_id', str(r['_id']))
     try:
@@ -44,7 +46,7 @@ def dump(raw):
 # maybe this should just go to a new collection of attempts
 @app.route('/messages/<msg_id>/attempt', methods=['POST'])
 def handle_attempt(msg_id):
-    collection = client['healthworkers'].messages
+    collection = client[COLLECTION].messages
     time = dt.datetime.now()
     update = collection.find_one_and_update(
         { '_id': ObjectId(msg_id)},
@@ -56,7 +58,7 @@ def handle_attempt(msg_id):
 def update_message(msg_id):
     data = request.json
     print(data)
-    collection = client['healthworkers'].messages
+    collection = client[COLLECTION].messages
     update = collection.find_one_and_update(
         { '_id': ObjectId(msg_id)},
         {'$set': data},
@@ -66,7 +68,7 @@ def update_message(msg_id):
 # TODO: remove this and all associated handlers + NLTK?
 @app.route('/messages', methods=['POST'])
 def new_message():
-    collection = client['healthworkers'].messages
+    collection = client[COLLECTION].messages
     msg = {k:request.form[k] for k in ['text', 'phone', 'time', 'run']}
     new_message_handler(collection, msg)
     return 'Success'
@@ -75,7 +77,7 @@ from time import sleep
 
 @app.route('/messages', methods=['GET'])
 def get_articles():
-    coll = client['healthworkers'].messages
+    coll = client[COLLECTION].messages
     hours = int(request.args.get('hours', 1))
     percent = float(request.args.get('percent', 0.75))
     start = int(request.args.get('start', 0))
