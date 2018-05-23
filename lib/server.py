@@ -72,13 +72,11 @@ def new_message():
     new_message_handler(collection, msg)
     return 'Success'
 
-from time import sleep
-
 @app.route('/messages', methods=['GET'])
 def get_articles():
     coll = client[DB].messages
-    hours = int(request.args.get('hours', 1))
-    percent = float(request.args.get('percent', 0.75))
+    hours = int(request.args.get('hours', 6))
+    percent = float(request.args.get('percent', 0.20))
     start = int(request.args.get('start', 0))
     num = int(request.args.get('num', 1))
 
