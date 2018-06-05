@@ -51,7 +51,10 @@ def get_worker_lookup(coll, district):
     cached = cache.get(district)
     if cached:
         return cached
-    res = coll.find({'chw_district': district})
+    res = coll.aggregate([
+        { '$match': {'chw_district': district }},
+        { '$sample': { 'size': 20 }}
+    ])
     lookup = {r.get('reporting_number'): r.get('name') for r in res}
     cache.set(district, lookup)
     return lookup
