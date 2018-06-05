@@ -25,7 +25,8 @@ CORS(app)
 client = MongoClient(
     os.environ.get('MONGO_HOST') or None,
     username = os.environ.get('MONGO_USER') or None,
-    password = os.environ.get('MONGO_PASS') or None
+    password = os.environ.get('MONGO_PASS') or None,
+    ssl = bool(os.getenv('MONGO_SSL'))
 )
 
 DB = 'healthworkers'
