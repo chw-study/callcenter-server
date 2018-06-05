@@ -5,7 +5,8 @@ from collections import OrderedDict
 import logging
 from toolz import assoc
 from cacheout import Cache
-cache = Cache(maxsize=1024, ttl=300)
+import random
+cache = Cache(maxsize=1024, ttl=180)
 
 def hours_ago(hours):
     return dt.datetime.utcnow() - dt.timedelta(hours = hours)
@@ -44,17 +45,17 @@ def get_call_counts(collection, district_lookup):
 
 
 def get_needed_calls(coll, percent, district_lookup):
-    return ({'workerPhone': c['workerPhone'], 'needed': needed_calls(c, percent)}
+    needed = ({'workerPhone': c['workerPhone'], 'needed': needed_calls(c, percent)}
             for c in group_call_counts(get_call_counts(coll, district_lookup)))
+    needed = list(needed)
+    random.shuffle(needed)
+    return needed
 
 def get_worker_lookup(coll, district):
     cached = cache.get(district)
     if cached:
         return cached
-    res = coll.aggregate([
-        { '$match': {'chw_district': district }},
-        { '$sample': { 'size': 20 }}
-    ])
+    res = coll.find({'chw_district': district })
     lookup = {r.get('reporting_number'): r.get('name') for r in res}
     cache.set(district, lookup)
     return lookup
