@@ -88,7 +88,6 @@ def test_get_records_listens_to_hours(collection, workers_coll):
     assert(recs[1]['workerName'] == 'bob')
     assert(len(recs) == 2)
 
-
 def test_get_records_listens_to_district(collection, workers_coll):
     lookup = get_worker_lookup(workers_coll, 'other')
     needed = [{'workerPhone': 'baz', 'needed': 1}]

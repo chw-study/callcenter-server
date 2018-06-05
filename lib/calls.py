@@ -61,11 +61,11 @@ def add_name(lookup, r):
 
 def get_records(coll, needed, hours, lookup):
     # TODO: Add filter for STALE records!!
-    cursors = ((coll
-                .find({ 'workerPhone': n['workerPhone'],
+    cursors = (coll.aggregate([
+        { '$match': { 'workerPhone': n['workerPhone'],
                         'called': None,
                         'noConsent': None,
-                        'attempts': {'$not': { '$gte': hours_ago(hours) }}})
-                .limit(n['needed']))
-               for n in needed if n['needed'] > 0)
+                        'attempts': {'$not': { '$gte': hours_ago(hours) }}}},
+        { '$sample': { 'size': n['needed'] }}
+    ]) for n in needed if n['needed'] > 0)
     return (add_name(lookup, c) for i in cursors for c in i)
