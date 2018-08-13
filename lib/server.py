@@ -29,7 +29,7 @@ client = MongoClient(
 
 DB = 'healthworkers'
 
-r = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=6379, db=0)
+r = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=6379, db=0, decode_responses=True)
 
 @app.route('/messages/event', methods=['POST'])
 def handle_event():
@@ -43,4 +43,7 @@ def handle_event():
 def get_articles():
     district = request.args.get('district')
     result = r.rpop(district)
-    return Response(dumps(result), content_type = 'application/json')
+    if result:
+        return Response(result, content_type = 'application/json')
+    else:
+        return 'Sorry! No records for that district', 404
