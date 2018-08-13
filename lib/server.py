@@ -32,10 +32,10 @@ DB = 'healthworkers'
 r = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=6379, db=0)
 
 @app.route('/messages/event', methods=['POST'])
-def handle_called():
+def handle_event():
     collection = client[DB].events
     event = request.json
-    event['timestamp'] = dt.datetime.utcnow()
+    event['event_time'] = dt.datetime.utcnow()
     update = collection.insert_one(event)
     return str(update.inserted_id)
 
@@ -43,4 +43,4 @@ def handle_called():
 def get_articles():
     district = request.args.get('district')
     result = r.rpop(district)
-    return Response(result, content_type = 'application/json')
+    return Response(dumps(result), content_type = 'application/json')
