@@ -1,7 +1,7 @@
 from flask import Flask, request, Response
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.collection import ReturnDocument
-from bson.json_util import dumps
+from bson.json_util import dumps, loads
 from bson.son import SON
 from bson.objectid import ObjectId
 from flask_cors import CORS, cross_origin
@@ -34,7 +34,9 @@ r = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=6379, db=0, decode_resp
 @app.route('/messages/event', methods=['POST'])
 def handle_event():
     collection = client[DB].events
-    event = request.json
+
+    # we need to reconstruct the mongo datatypes (date)
+    event = loads(request.data)
     event['event_time'] = dt.datetime.utcnow()
     update = collection.insert_one(event)
     return str(update.inserted_id)
