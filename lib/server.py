@@ -29,7 +29,11 @@ client = MongoClient(
 
 DB = 'healthworkers'
 
-r = redis.StrictRedis(host=os.getenv('REDIS_HOST'), port=6379, db=0, decode_responses=True)
+r = redis.StrictRedis(host=os.getenv('REDIS_HOST', 'localhost'),
+                      password=os.getenv('REDIS_PASS', None),
+                      port=os.getenv('REDIS_PORT', 6379),
+                      db=os.getenv('REDIS_DB', 0),
+                      decode_responses=True)
 
 @app.route('/messages/event', methods=['POST'])
 def handle_event():
