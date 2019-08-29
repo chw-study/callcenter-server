@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hw-server-deployment
+  labels:
+    app: hw-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hw-server
+  template:
+    metadata:
+      labels:
+        app: hw-server
+    spec:
+      containers:
+      - name: hw-server
+        image: nandanrao/hw-server
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "100Mi"
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: hw-server-envs

@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hw-server
+spec:
+  selector:
+    app: hw-server
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
